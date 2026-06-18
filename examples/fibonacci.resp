@@ -1,0 +1,11 @@
+fk fibonacco(n: ent32) -> ent32 {
+    se n <= 1 {
+        redonu n;
+    }
+    redonu fibonacco(n - 1) + fibonacco(n - 2);
+}
+
+fk ĉefa() {
+    estu rezulto: ent32 = fibonacco(10);
+    println!("Fibonacci(10) = {}", rezulto);
+}

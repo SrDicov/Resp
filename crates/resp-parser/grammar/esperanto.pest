@@ -1,0 +1,212 @@
+WHITESPACE = _{ " " | "\t" | "\n" | "\r" | "\r\n" }
+COMMENT = _{ "//" ~ (!"\n" ~ ANY)* }
+
+program = { SOI ~ declaration* ~ EOI }
+
+declaration = {
+    funkcio_decl
+    | strk_decl
+    | enumb_decl
+    | realigu_decl
+    | trajto_decl
+    | estu_decl
+    | uzu_decl
+    | se_stmt
+    | dum_stmt
+    | por_stmt
+    | ripetu_stmt
+    | kongruu_stmt
+    | expr_stmt
+}
+
+se_stmt = { se_expr }
+dum_stmt = { dum_expr }
+por_stmt = { por_expr }
+ripetu_stmt = { ripetu_expr }
+kongruu_stmt = { kongruu_expr }
+
+// -- Keywords --
+fk_keyword  = { "fk" }
+estu_keyword = { "estu" }
+sang_keyword = { "ŝanĝ" }
+strk_keyword = { "strk" }
+realigu_keyword = { "realigu" }
+trajto_keyword = { "trajto" }
+enumb_keyword = { "enumb" }
+kongruu_keyword = { "kongruu" }
+ripetu_keyword = { "ripetu" }
+por_keyword  = { "por" }
+en_keyword   = { "en" }
+dum_keyword  = { "dum" }
+se_keyword   = { "se" }
+alie_keyword = { "alie" }
+redonu_keyword = { "redonu" }
+pub_keyword  = { "pub" }
+uzu_keyword  = { "uzu" }
+kesto_keyword = { "kesto" }
+malsekura_keyword = { "malsekura" }
+provu_keyword = { "provu" }
+kaptu_keyword = { "kaptu" }
+etendu_keyword = { "etendu" }
+
+// -- Types --
+tipo_ent = { "ent" ~ ("8" | "16" | "32" | "64" | "128" | "g") }
+tipo_nat = { "nat" ~ ("8" | "16" | "32" | "64" | "128" | "g") }
+tipo_glit = { "glit" ~ ("32" | "64") }
+tipo_bulea = { "bulea" }
+tipo_kar = { "kar" }
+tipo_cen = { "ĉen" }
+tipo_teksto = { "Teksto" }
+tipo_vektoro = { "Vektoro" ~ "<" ~ tipo ~ ">" }
+
+tipo = {
+    tipo_ent
+    | tipo_nat
+    | tipo_glit
+    | tipo_bulea
+    | tipo_kar
+    | tipo_cen
+    | tipo_teksto
+    | tipo_vektoro
+    | "&" ~ sang_keyword? ~ tipo
+    | identigilo
+}
+
+// -- Literals --
+integer_literal = @{ ASCII_DIGIT+ }
+float_literal   = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ }
+string_literal  = @{ "\"" ~ (("\\" ~ ANY) | (!("\"" | "\\") ~ ANY))* ~ "\"" }
+char_literal    = @{ "'" ~ (!("'" | "\\") ~ ( "\\" ~ ANY )) ~ "'" }
+bool_literal    = { "vera" | "malvera" }
+
+literal = {
+    float_literal
+    | integer_literal
+    | string_literal
+    | char_literal
+    | bool_literal
+}
+
+// -- Identifiers --
+identigilo = @{ (ASCII_ALPHANUMERIC | "_" | '\u{00C0}'..'\u{024F}')+ }
+
+// -- Expressions --
+expr = {
+    asigno_expr
+}
+
+asigno_expr = { or_expr ~ ("=" ~ asigno_expr)? }
+
+or_expr = { and_expr ~ ("aŭ" ~ and_expr)* }
+and_expr = { cmp_expr ~ ("kaj" ~ cmp_expr)* }
+
+cmp_expr = { add_expr ~ (cmp_op ~ add_expr)? }
+cmp_op = { "==" | "!=" | "<=" | ">=" | "<" | ">" }
+
+add_expr = { mul_expr ~ (add_op ~ mul_expr)* }
+add_op = { "+" | "-" }
+
+mul_expr = { unary_expr ~ (mul_op ~ unary_expr)* }
+mul_op = { "*" | "/" | "%" }
+
+unary_expr = {
+    unary_op ~ unary_expr
+    | voko_expr
+}
+unary_op = { "-" | "!" | "&" ~ sang_keyword? | "*" }
+
+voko_expr = { atomo ~ voko_sufikso* }
+
+voko_sufikso = {
+    "." ~ identigilo
+    | "[" ~ expr ~ "]"
+    | "(" ~ expr_list? ~ ")"
+    | "!" ~ "(" ~ expr_list? ~ ")"
+}
+
+atomo = {
+    literal
+    | se_expr
+    | dum_expr
+    | por_expr
+    | ripetu_expr
+    | kongruu_expr
+    | bloko
+    | redonu_expr
+    | "(" ~ expr ~ ")"
+    | identigilo
+}
+
+bloko = { "{" ~ declaration* ~ "}" }
+
+se_expr = { se_keyword ~ expr ~ bloko ~ (alie_keyword ~ bloko)? }
+dum_expr = { dum_keyword ~ expr ~ bloko }
+por_expr = { por_keyword ~ identigilo ~ en_keyword ~ expr ~ bloko }
+ripetu_expr = { ripetu_keyword ~ bloko }
+kongruu_expr = { kongruu_keyword ~ expr ~ "{" ~ brako+ ~ "}" }
+brako = { patrono ~ "=>" ~ bloko }
+
+redonu_expr = { redonu_keyword ~ expr? }
+
+// -- Patronoj (Patterns) --
+patrono = {
+    patrono_lit
+    | patrono_ident
+    | patrono_var
+    | patrono_cio
+}
+patrono_lit = { literal }
+patrono_ident = { identigilo ~ (patrono_tipoj)? }
+patrono_var = { identigilo ~ "(" ~ (patrono ~ ("," ~ patrono)*)? ~ ")" }
+patrono_tipoj = { "(" ~ patrono ~ ("," ~ patrono)* ~ ")" }
+patrono_cio = { "_" }
+
+// -- Declarations --
+expr_stmt = { expr ~ ";" }
+
+estu_decl = { estu_keyword ~ sang_keyword? ~ identigilo ~ (":" ~ tipo)? ~ ("=" ~ expr)? ~ ";" }
+
+funkcio_decl = {
+    pub_keyword? ~ fk_keyword ~ identigilo ~ "(" ~ param_list? ~ ")" ~ ("->" ~ tipo)? ~ bloko
+}
+
+param_list = { param ~ ("," ~ param)* }
+param = { identigilo ~ ":" ~ tipo }
+
+strk_decl = {
+    pub_keyword? ~ strk_keyword ~ identigilo ~ (etendu_keyword ~ identigilo)? ~ "{" ~ kampo* ~ "}"
+}
+
+kampo = { pub_keyword? ~ identigilo ~ ":" ~ tipo ~ ","? }
+
+enumb_decl = {
+    pub_keyword? ~ enumb_keyword ~ identigilo ~ (":" ~ tipo)? ~ "{" ~ enumb_variant+ ~ "}"
+}
+
+enumb_variant = { identigilo ~ ("(" ~ tipo ~ ("," ~ tipo)* ~ ")")? ~ ","? }
+
+realigu_decl = {
+    realigu_keyword ~ tipo_vojo ~ "{" ~ funkcio_decl* ~ "}"
+}
+
+trajto_decl = {
+    pub_keyword? ~ trajto_keyword ~ identigilo ~ "{" ~ trajto_metodo* ~ "}"
+}
+
+trajto_metodo = {
+    fk_keyword ~ identigilo ~ "(" ~ param_list? ~ ")" ~ ("->" ~ tipo)? ~ ";"
+}
+
+uzu_decl = {
+    uzu_keyword ~ uzu_vojo ~ ";"
+}
+
+uzu_vojo = {
+    identigilo ~ ("::" ~ identigilo)* ~ ("::" ~ "*")?
+}
+
+tipo_vojo = {
+    identigilo ~ ("::" ~ identigilo)*
+}
+
+expr_list = { expr ~ ("," ~ expr)* }

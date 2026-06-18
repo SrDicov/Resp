@@ -1,0 +1,10 @@
+uzu std::io;
+
+fk saluton(nomo: &ĉen) {
+    println!("Saluton, {}!", nomo);
+}
+
+fk ĉefa() {
+    estu nomo: Teksto = "Mondo";
+    saluton(&nomo);
+}
