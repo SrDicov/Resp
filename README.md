@@ -25,7 +25,7 @@ fk ĉefa() {
 ### Konstrui
 
 ```bash
-git clone https://github.com/DicovDev/Resp.git
+git clone https://github.com/SrDicov/Resp.git
 cd Resp
 cargo build --release
 ```

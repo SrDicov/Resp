@@ -4,7 +4,7 @@ Dankon pro via intereso kontribui al Resp! Jen kelkaj gvidlinioj por helpi vin.
 
 ## Raporti Problemajn
 
-- Uzu la [GitHub Issues](https://github.com/DicovDev/Resp/issues) por raporti cimojn
+- Uzu la [GitHub Issues](https://github.com/SrDicov/Resp/issues) por raporti cimojn
 - Inkluzivu ekzemplan `.resp` dosieron kaj la atenditan rezulton
 - Se eble, inkluzivu la erarmesaĝon
 
