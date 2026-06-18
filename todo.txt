@@ -1,0 +1,1930 @@
+======================================================================
+ todo.txt - Resp kompleta projekto
+======================================================================
+
+
+======================================================================
+ README.md
+======================================================================
+# Resp - Programlingvo Esperanto → Rust
+
+**Resp** estas programlingvo, kiu transpilas Esperantan kodarbon al Rust. Ĝi kombinas la ergonomion de C++ kun la sekureco de Rust, uzante vortprovizon el Esperanto.
+
+```
+fk fibonacco(n: ent32) -> ent32 {
+    se n <= 1 {
+        redonu n;
+    }
+    redonu fibonacco(n - 1) + fibonacco(n - 2);
+}
+
+fk ĉefa() {
+    estu rezulto: ent32 = fibonacco(10);
+    println!("Fibonacci(10) = {}", rezulto);
+}
+```
+
+## Instalado
+
+### Antaŭkondiĉoj
+
+- [Rust](https://www.rust-lang.org/tools/install) (1.70+)
+
+### Konstrui
+
+```bash
+git clone https://github.com/SrDicov/Resp.git
+cd Resp
+cargo build --release
+```
+
+### Uzado
+
+```bash
+# Transpili .resp dosieron al Rust
+cargo run --bin resp-cli -- programo.resp -o programo.rs
+
+# Aŭtomate formati kaj kompili
+cargo run --bin resp-cli -- programo.resp -o programo.rs --fmt --compile
+```
+
+## Ekzemploj
+
+```bash
+# Saluton, Mondo!
+cargo run --bin resp-cli -- examples/hello.resp -o /tmp/hello.rs --fmt --compile
+/tmp/hello
+# => Saluton, Mondo!
+
+# Fibonacco
+cargo run --bin resp-cli -- examples/fibonacci.resp -o /tmp/fib.rs --fmt --compile
+/tmp/fib
+# => Fibonacci(10) = 55
+```
+
+## Ŝlosilvortoj
+
+| Esperanto | Rust    | Priskribo                         |
+|-----------|---------|-----------------------------------|
+| `fk`      | `fn`    | Funkcia deklaracio                |
+| `estu`    | `let`   | Variabla deklaracio               |
+| `ŝanĝ`    | `mut`   | Mutabileco                        |
+| `strk`    | `struct`| Struktura difino                  |
+| `realigu` | `impl`  | Efektivigo de metodoj             |
+| `trajto`  | `trait` | Interfaca difino                  |
+| `enumb`   | `enum`  | Nombritaj tipoj                   |
+| `kongruu` | `match` | Padrona kongruigo                 |
+| `ripetu`  | `loop`  | Senfina buklo                     |
+| `por`     | `for`   | Iteracio super kolekto            |
+| `en`      | `in`    | Enkluzivo en `por` buklo          |
+| `dum`     | `while` | Kondiĉa buklo                     |
+| `se`      | `if`    | Kondiĉa branĉo                    |
+| `alie`    | `else`  | Nega kondiĉa branĉo               |
+| `redonu`  | `return`| Reveno de valoro                  |
+| `uzu`     | `use`   | Importo de moduloj                |
+| `kesto`   | `crate` | Radiko de paketo                  |
+| `malsekura`| `unsafe`| Nersekuraj operacioj              |
+| `pub`     | `pub`   | Publika videbleco                 |
+
+## Datumtipoj
+
+| Esperanto  | Rust     | Priskribo                        |
+|------------|----------|----------------------------------|
+| `ent8`     | `i8`     | Entjero kun signo (8-bit)        |
+| `ent16`    | `i16`    | Entjero kun signo (16-bit)       |
+| `ent32`    | `i32`    | Entjero kun signo (32-bit)       |
+| `ent64`    | `i64`    | Entjero kun signo (64-bit)       |
+| `ent128`   | `i128`   | Entjero kun signo (128-bit)      |
+| `entg`     | `isize`  | Entjero kun signo (platforma)    |
+| `nat8`     | `u8`     | Sensigna entjero (8-bit)         |
+| `nat16`    | `u16`    | Sensigna entjero (16-bit)        |
+| `nat32`    | `u32`    | Sensigna entjero (32-bit)        |
+| `nat64`    | `u64`    | Sensigna entjero (64-bit)        |
+| `nat128`   | `u128`   | Sensigna entjero (128-bit)       |
+| `natg`     | `usize`  | Sensigna entjero (platforma)     |
+| `glit32`   | `f32`    | Glitkoma nombro (32-bit)         |
+| `glit64`   | `f64`    | Glitkoma nombro (64-bit)         |
+| `bulea`    | `bool`   | Logika valoro                    |
+| `kar`      | `char`   | Unikoda signo                    |
+| `ĉen`      | `str`    | Signoĉeno (ne dinamika)          |
+| `Teksto`   | `String` | Dinamika signoĉeno               |
+| `Vektoro`  | `Vec`    | Dinamika tabelo                  |
+
+## Buleaj valoroj
+
+| Esperanto  | Rust    |
+|------------|---------|
+| `vera`     | `true`  |
+| `malvera`  | `false` |
+
+## Arkitekturo
+
+La projekto konsistas el kvar kestoj (crates):
+
+```
+├── Cargo.toml          # Laborspaca difino
+├── crates/
+│   ├── resp-ast/       # AST-difinoj por la lingvo
+│   ├── resp-parser/    # Sintaksa analizilo (pest PEG)
+│   ├── resp-transpiler/# Rust-kodgeneratoro (syn/quote)
+│   └── resp-cli/       # Komandlinia interfaco
+├── examples/           # Ekzemplaj .resp dosieroj
+└── tests/              # Integrigaj testoj
+```
+
+## Disvolvado
+
+```bash
+# Konstrui
+cargo build
+
+# Testi
+cargo test
+
+# Formati
+cargo fmt
+
+# Lint
+cargo clippy
+```
+
+## Permesilo
+
+MIT
+
+======================================================================
+ CONTRIBUTING.md
+======================================================================
+# Kontribuado al Resp
+
+Dankon pro via intereso kontribui al Resp! Jen kelkaj gvidlinioj por helpi vin.
+
+## Raporti Problemajn
+
+- Uzu la [GitHub Issues](https://github.com/SrDicov/Resp/issues) por raporti cimojn
+- Inkluzivu ekzemplan `.resp` dosieron kaj la atenditan rezulton
+- Se eble, inkluzivu la erarmesaĝon
+
+## Kontribui Kodon
+
+1. Forku la deponejon
+2. Kreu novan branĉon: `git switch -c mia-funkcio`
+3. Faru viajn ŝanĝojn
+4. Certigu, ke ĉio konstruiĝas: `cargo build`
+5. Plenumi testojn: `cargo test`
+6. Sendu Pull Request
+
+## Kodaj Normoj
+
+- Sekvu la ekzistantan kodian stilon
+- Uzu `cargo fmt` antaŭ ol sendi
+- Ne inkluzivu komentariojn en la kodo (krom dokumentado)
+- Skribu testojn por novaj funkcioj
+
+## Strukturo de la Projekto
+
+- `resp-ast` - AST-tipoj (neniu ekstera dependeco)
+- `resp-parser` - Analizilo uzanta pest PEG-gramatikon
+- `resp-transpiler` - Rust-kodgeneratoro uzanta syn/quote
+- `resp-cli` - CLI-ilo uzanta clap
+
+## Aldoni Novan Ŝlosilvorton
+
+1. Aldoni la regulon en `crates/resp-parser/grammar/esperanto.pest`
+2. Aldoni la AST-enumon en `crates/resp-ast/src/lib.rs`
+3. Aldoni la analizan logikon en `crates/resp-parser/src/lib.rs`
+4. Aldoni la transpilan logikon en `crates/resp-transpiler/src/lib.rs`
+5. Aldoni la ŝlosilvorton al la mapo en `README.md`
+6. Verki testojn
+
+======================================================================
+ LICENSE
+======================================================================
+MIT License
+
+Copyright (c) 2026 SrDicov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+======================================================================
+ Cargo.toml (workspace)
+======================================================================
+[workspace]
+members = [
+    "crates/resp-ast",
+    "crates/resp-parser",
+    "crates/resp-transpiler",
+    "crates/resp-cli",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+description = "Esperanto-keyword programming language that transpiles to Rust"
+authors = ["SrDicov"]
+license = "MIT"
+repository = "https://github.com/SrDicov/Resp"
+homepage = "https://github.com/SrDicov/Resp"
+
+======================================================================
+ .gitignore
+======================================================================
+/target
+*.rs.bk
+Cargo.lock
+
+======================================================================
+ crates/resp-ast/Cargo.toml
+======================================================================
+[package]
+name = "resp-ast"
+version.workspace = true
+edition.workspace = true
+description.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
+
+======================================================================
+ crates/resp-ast/src/lib.rs
+======================================================================
+//! AST-types for the Resp programming language.
+//!
+//! This crate defines the abstract syntax tree (AST) used by the Resp
+//! transpiler pipeline. It has no external dependencies.
+
+use std::fmt;
+
+pub type Span = (usize, usize);
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Located<T> {
+    pub value: T,
+    pub span: Span,
+}
+
+impl<T> Located<T> {
+    pub fn new(value: T, span: Span) -> Self {
+        Located { value, span }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Tipo {
+    Ent8,
+    Ent16,
+    Ent32,
+    Ent64,
+    Ent128,
+    EntG,
+    Nat8,
+    Nat16,
+    Nat32,
+    Nat64,
+    Nat128,
+    NatG,
+    Glit32,
+    Glit64,
+    Bulea,
+    Kar,
+    Ĉen,
+    Teksto,
+    Vektoro(Box<Tipo>),
+    Nombrita(String, Vec<Tipo>),
+    Referenco(Box<Tipo>),
+    ReferencoŜanĝ(Box<Tipo>),
+    Malferma(String),
+}
+
+impl fmt::Display for Tipo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Tipo::Ent8 => write!(f, "ent8"),
+            Tipo::Ent16 => write!(f, "ent16"),
+            Tipo::Ent32 => write!(f, "ent32"),
+            Tipo::Ent64 => write!(f, "ent64"),
+            Tipo::Ent128 => write!(f, "ent128"),
+            Tipo::EntG => write!(f, "entg"),
+            Tipo::Nat8 => write!(f, "nat8"),
+            Tipo::Nat16 => write!(f, "nat16"),
+            Tipo::Nat32 => write!(f, "nat32"),
+            Tipo::Nat64 => write!(f, "nat64"),
+            Tipo::Nat128 => write!(f, "nat128"),
+            Tipo::NatG => write!(f, "natg"),
+            Tipo::Glit32 => write!(f, "glit32"),
+            Tipo::Glit64 => write!(f, "glit64"),
+            Tipo::Bulea => write!(f, "bulea"),
+            Tipo::Kar => write!(f, "kar"),
+            Tipo::Ĉen => write!(f, "ĉen"),
+            Tipo::Teksto => write!(f, "Teksto"),
+            Tipo::Vektoro(t) => write!(f, "Vektoro<{}>", t),
+            Tipo::Nombrita(n, _) => write!(f, "{}", n),
+            Tipo::Referenco(t) => write!(f, "&{}", t),
+            Tipo::ReferencoŜanĝ(t) => write!(f, "&ŝanĝ {}", t),
+            Tipo::Malferma(n) => write!(f, "{}", n),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Literal {
+    Ent(IntegerBase, String),
+    Glit(String),
+    Teksta(String),
+    Kara(char),
+    Bulea(bool),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum IntegerBase {
+    Dekuma,
+    Duuma,
+    Okuma,
+    Deksesuma,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum UnuargOperaciilo {
+    Negi,
+    Ne,
+    Referenci,
+    Dereferenci,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum DuargOperaciilo {
+    Aldoni,
+    Subtrahi,
+    Multipliki,
+    Dividi,
+    Resto,
+    Egala,
+    NeEgala,
+    Malpli,
+    MalpliEgala,
+    Pli,
+    PliEgala,
+    Kaj,
+    Au,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Esprimo {
+    Literal(Located<Literal>),
+    Identigilo(Located<String>),
+    Unuarg(Located<UnuargOperaciilo>, Box<Esprimo>),
+    Duarg(Box<Esprimo>, Located<DuargOperaciilo>, Box<Esprimo>),
+    Asigno(Box<Esprimo>, Box<Esprimo>),
+    Voko(Box<Esprimo>, Vec<Esprimo>),
+    Makro(Box<Esprimo>, Vec<Esprimo>),
+    Membro(Box<Esprimo>, Located<String>),
+    Indekso(Box<Esprimo>, Box<Esprimo>),
+    Bloko(Vec<Deklaro>),
+    Se(Box<Esprimo>, Vec<Deklaro>, Option<Vec<Deklaro>>),
+    Dum(Box<Esprimo>, Vec<Deklaro>),
+    Por(Located<String>, Box<Esprimo>, Vec<Deklaro>),
+    Ripetu(Vec<Deklaro>),
+    Kongruu(Box<Esprimo>, Vec<Brako>),
+    Redonu(Box<Esprimo>),
+    Provu(Vec<Deklaro>, Option<Vec<Deklaro>>),
+    Kreis(Vec<Deklaro>),
+    Kreu(Vec<Deklaro>),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Brako {
+    pub patrono: Patrono,
+    pub korpo: Vec<Deklaro>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Patrono {
+    Ĉio,
+    Literal(Located<Literal>),
+    Identigilo(Located<String>),
+    Varianto(Located<String>, Option<Vec<Patrono>>),
+    Kondiĉa(Box<Patrono>, Box<Esprimo>),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Deklaro {
+    Estu(Located<String>, Option<Tipo>, Option<Esprimo>, bool),
+    Funkcio {
+        nomo: Located<String>,
+        parametroj: Vec<Parametro>,
+        reveno: Option<Tipo>,
+        korpo: Vec<Deklaro>,
+    },
+    Strk {
+        nomo: Located<String>,
+        etendo: Option<String>,
+        kampoj: Vec<Kampo>,
+    },
+    Enumb {
+        nomo: Located<String>,
+        variantoj: Vec<Varianto>,
+    },
+    Realigu {
+        tipo: String,
+        membroj: Vec<Deklaro>,
+    },
+    Trajto {
+        nomo: Located<String>,
+        metodoj: Vec<Deklaro>,
+    },
+    Uzu {
+        vojo: String,
+    },
+    EsprimoStmt(Esprimo),
+    Komento(String),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Parametro {
+    pub nomo: Located<String>,
+    pub tipo: Option<Tipo>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Kampo {
+    pub nomo: Located<String>,
+    pub tipo: Tipo,
+    pub visiblo: Option<Visiblo>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Varianto {
+    pub nomo: Located<String>,
+    pub tipoj: Vec<Tipo>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Visiblo {
+    Publika,
+    Privata,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Programo {
+    pub deklaroj: Vec<Deklaro>,
+}
+
+======================================================================
+ crates/resp-parser/Cargo.toml
+======================================================================
+[package]
+name = "resp-parser"
+version.workspace = true
+edition.workspace = true
+description.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
+resp-ast = { path = "../resp-ast" }
+pest = "2"
+pest_derive = "2"
+
+======================================================================
+ crates/resp-parser/grammar/esperanto.pest
+======================================================================
+WHITESPACE = _{ " " | "\t" | "\n" | "\r" | "\r\n" }
+COMMENT = _{ "//" ~ (!"\n" ~ ANY)* }
+
+program = { SOI ~ declaration* ~ EOI }
+
+declaration = {
+    funkcio_decl
+    | strk_decl
+    | enumb_decl
+    | realigu_decl
+    | trajto_decl
+    | estu_decl
+    | uzu_decl
+    | se_stmt
+    | dum_stmt
+    | por_stmt
+    | ripetu_stmt
+    | kongruu_stmt
+    | expr_stmt
+}
+
+se_stmt = { se_expr }
+dum_stmt = { dum_expr }
+por_stmt = { por_expr }
+ripetu_stmt = { ripetu_expr }
+kongruu_stmt = { kongruu_expr }
+
+// -- Keywords --
+fk_keyword  = { "fk" }
+estu_keyword = { "estu" }
+sang_keyword = { "ŝanĝ" }
+strk_keyword = { "strk" }
+realigu_keyword = { "realigu" }
+trajto_keyword = { "trajto" }
+enumb_keyword = { "enumb" }
+kongruu_keyword = { "kongruu" }
+ripetu_keyword = { "ripetu" }
+por_keyword  = { "por" }
+en_keyword   = { "en" }
+dum_keyword  = { "dum" }
+se_keyword   = { "se" }
+alie_keyword = { "alie" }
+redonu_keyword = { "redonu" }
+pub_keyword  = { "pub" }
+uzu_keyword  = { "uzu" }
+kesto_keyword = { "kesto" }
+malsekura_keyword = { "malsekura" }
+provu_keyword = { "provu" }
+kaptu_keyword = { "kaptu" }
+etendu_keyword = { "etendu" }
+
+// -- Types --
+tipo_ent = { "ent" ~ ("8" | "16" | "32" | "64" | "128" | "g") }
+tipo_nat = { "nat" ~ ("8" | "16" | "32" | "64" | "128" | "g") }
+tipo_glit = { "glit" ~ ("32" | "64") }
+tipo_bulea = { "bulea" }
+tipo_kar = { "kar" }
+tipo_cen = { "ĉen" }
+tipo_teksto = { "Teksto" }
+tipo_vektoro = { "Vektoro" ~ "<" ~ tipo ~ ">" }
+
+tipo = {
+    tipo_ent
+    | tipo_nat
+    | tipo_glit
+    | tipo_bulea
+    | tipo_kar
+    | tipo_cen
+    | tipo_teksto
+    | tipo_vektoro
+    | "&" ~ sang_keyword? ~ tipo
+    | identigilo
+}
+
+// -- Literals --
+integer_literal = @{ ASCII_DIGIT+ }
+float_literal   = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ }
+string_literal  = @{ "\"" ~ (("\\" ~ ANY) | (!("\"" | "\\") ~ ANY))* ~ "\"" }
+char_literal    = @{ "'" ~ (!("'" | "\\") ~ ( "\\" ~ ANY )) ~ "'" }
+bool_literal    = { "vera" | "malvera" }
+
+literal = {
+    float_literal
+    | integer_literal
+    | string_literal
+    | char_literal
+    | bool_literal
+}
+
+// -- Identifiers --
+identigilo = @{ (ASCII_ALPHANUMERIC | "_" | '\u{00C0}'..'\u{024F}')+ }
+
+// -- Expressions --
+expr = {
+    asigno_expr
+}
+
+asigno_expr = { or_expr ~ ("=" ~ asigno_expr)? }
+
+or_expr = { and_expr ~ ("aŭ" ~ and_expr)* }
+and_expr = { cmp_expr ~ ("kaj" ~ cmp_expr)* }
+
+cmp_expr = { add_expr ~ (cmp_op ~ add_expr)? }
+cmp_op = { "==" | "!=" | "<=" | ">=" | "<" | ">" }
+
+add_expr = { mul_expr ~ (add_op ~ mul_expr)* }
+add_op = { "+" | "-" }
+
+mul_expr = { unary_expr ~ (mul_op ~ unary_expr)* }
+mul_op = { "*" | "/" | "%" }
+
+unary_expr = {
+    unary_op ~ unary_expr
+    | voko_expr
+}
+unary_op = { "-" | "!" | "&" ~ sang_keyword? | "*" }
+
+voko_expr = { atomo ~ voko_sufikso* }
+
+voko_sufikso = {
+    "." ~ identigilo
+    | "[" ~ expr ~ "]"
+    | "(" ~ expr_list? ~ ")"
+    | "!" ~ "(" ~ expr_list? ~ ")"
+}
+
+atomo = {
+    literal
+    | se_expr
+    | dum_expr
+    | por_expr
+    | ripetu_expr
+    | kongruu_expr
+    | bloko
+    | redonu_expr
+    | "(" ~ expr ~ ")"
+    | identigilo
+}
+
+bloko = { "{" ~ declaration* ~ "}" }
+
+se_expr = { se_keyword ~ expr ~ bloko ~ (alie_keyword ~ bloko)? }
+dum_expr = { dum_keyword ~ expr ~ bloko }
+por_expr = { por_keyword ~ identigilo ~ en_keyword ~ expr ~ bloko }
+ripetu_expr = { ripetu_keyword ~ bloko }
+kongruu_expr = { kongruu_keyword ~ expr ~ "{" ~ brako+ ~ "}" }
+brako = { patrono ~ "=>" ~ bloko }
+
+redonu_expr = { redonu_keyword ~ expr? }
+
+// -- Patronoj (Patterns) --
+patrono = {
+    patrono_lit
+    | patrono_ident
+    | patrono_var
+    | patrono_cio
+}
+patrono_lit = { literal }
+patrono_ident = { identigilo ~ (patrono_tipoj)? }
+patrono_var = { identigilo ~ "(" ~ (patrono ~ ("," ~ patrono)*)? ~ ")" }
+patrono_tipoj = { "(" ~ patrono ~ ("," ~ patrono)* ~ ")" }
+patrono_cio = { "_" }
+
+// -- Declarations --
+expr_stmt = { expr ~ ";" }
+
+estu_decl = { estu_keyword ~ sang_keyword? ~ identigilo ~ (":" ~ tipo)? ~ ("=" ~ expr)? ~ ";" }
+
+funkcio_decl = {
+    pub_keyword? ~ fk_keyword ~ identigilo ~ "(" ~ param_list? ~ ")" ~ ("->" ~ tipo)? ~ bloko
+}
+
+param_list = { param ~ ("," ~ param)* }
+param = { identigilo ~ ":" ~ tipo }
+
+strk_decl = {
+    pub_keyword? ~ strk_keyword ~ identigilo ~ (etendu_keyword ~ identigilo)? ~ "{" ~ kampo* ~ "}"
+}
+
+kampo = { pub_keyword? ~ identigilo ~ ":" ~ tipo ~ ","? }
+
+enumb_decl = {
+    pub_keyword? ~ enumb_keyword ~ identigilo ~ (":" ~ tipo)? ~ "{" ~ enumb_variant+ ~ "}"
+}
+
+enumb_variant = { identigilo ~ ("(" ~ tipo ~ ("," ~ tipo)* ~ ")")? ~ ","? }
+
+realigu_decl = {
+    realigu_keyword ~ tipo_vojo ~ "{" ~ funkcio_decl* ~ "}"
+}
+
+trajto_decl = {
+    pub_keyword? ~ trajto_keyword ~ identigilo ~ "{" ~ trajto_metodo* ~ "}"
+}
+
+trajto_metodo = {
+    fk_keyword ~ identigilo ~ "(" ~ param_list? ~ ")" ~ ("->" ~ tipo)? ~ ";"
+}
+
+uzu_decl = {
+    uzu_keyword ~ uzu_vojo ~ ";"
+}
+
+uzu_vojo = {
+    identigilo ~ ("::" ~ identigilo)* ~ ("::" ~ "*")?
+}
+
+tipo_vojo = {
+    identigilo ~ ("::" ~ identigilo)*
+}
+
+expr_list = { expr ~ ("," ~ expr)* }
+
+======================================================================
+ crates/resp-parser/src/lib.rs
+======================================================================
+//! Parser for the Resp programming language.
+//!
+//! Uses pest PEG grammar to parse `.resp` source files into
+//! the AST defined in `resp-ast`.
+
+use resp_ast::*;
+use pest::error::Error;
+use pest::iterators::Pair;
+use pest::Parser;
+use pest_derive::Parser as PestDerive;
+
+#[derive(PestDerive)]
+#[grammar = "../grammar/esperanto.pest"]
+pub struct RespParser;
+
+pub fn parse_programo(eno: &str) -> Result<Programo, Error<Rule>> {
+    let mut paroj = RespParser::parse(Rule::program, eno)?;
+    let programo = paroj.next().unwrap();
+    let mut deklaroj = Vec::new();
+
+    for deklaro in programo.into_inner() {
+        if let Some(d) = process_declaration(deklaro) {
+            deklaroj.push(d);
+        }
+    }
+
+    Ok(Programo { deklaroj })
+}
+
+fn span(el: &Pair<Rule>) -> Span {
+    let (lineo, kolumno) = el.line_col();
+    (lineo, kolumno)
+}
+
+fn process_declaration(pair: Pair<Rule>) -> Option<Deklaro> {
+    let pair = if pair.as_rule() == Rule::declaration {
+        pair.into_inner().next().unwrap()
+    } else {
+        pair
+    };
+    match pair.as_rule() {
+        Rule::estu_decl => {
+            let interno: Vec<_> = pair.into_inner().collect();
+            let mut idx = 0;
+            let mut mutebla = false;
+
+            if idx < interno.len() && interno[idx].as_rule() == Rule::estu_keyword {
+                idx += 1;
+            }
+            if idx < interno.len() && interno[idx].as_rule() == Rule::sang_keyword {
+                mutebla = true;
+                idx += 1;
+            }
+
+            let nomo = &interno[idx];
+            idx += 1;
+            let nomo_str = nomo.as_str().to_string();
+            let sp = span(nomo);
+
+            let tipo = if idx < interno.len() && interno[idx].as_rule() == Rule::tipo {
+                let t = parse_tipo(interno[idx].clone());
+                idx += 1;
+                Some(t)
+            } else {
+                None
+            };
+
+            let expr = if idx < interno.len() {
+                Some(parse_expr(interno[idx].clone()))
+            } else {
+                None
+            };
+
+            Some(Deklaro::Estu(Located::new(nomo_str, sp), tipo, expr, mutebla))
+        }
+        Rule::funkcio_decl => {
+            let mut interno = pair.into_inner();
+            // skip keyword pairs (pub_keyword?, fk_keyword) to get to identigilo
+            let mut nomo_str = String::new();
+            let mut sp = (0, 0);
+            let mut parametroj = Vec::new();
+            let mut reveno = None;
+            let mut korpo = Vec::new();
+
+            for child in &mut interno {
+                match child.as_rule() {
+                    Rule::identigilo => {
+                        nomo_str = child.as_str().to_string();
+                        sp = span(&child);
+                    }
+                    Rule::param_list => {
+                        for param in child.into_inner() {
+                            if param.as_rule() == Rule::param {
+                                let mut p = param.into_inner();
+                                let p_nomo = p.next().unwrap();
+                                let p_tipo = p.next().unwrap();
+                                parametroj.push(Parametro {
+                                    nomo: Located::new(p_nomo.as_str().to_string(), span(&p_nomo)),
+                                    tipo: Some(parse_tipo(p_tipo)),
+                                });
+                            }
+                        }
+                    }
+                    Rule::tipo => {
+                        reveno = Some(parse_tipo(child));
+                    }
+                    Rule::bloko => {
+                        for d in child.into_inner() {
+                            if let Some(decl) = process_declaration(d) {
+                                korpo.push(decl);
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+            }
+
+            Some(Deklaro::Funkcio {
+                nomo: Located::new(nomo_str, sp),
+                parametroj,
+                reveno,
+                korpo,
+            })
+        }
+        Rule::strk_decl => {
+            let mut interno = pair.into_inner();
+            let nomo = interno.next().unwrap();
+            let nomo_str = nomo.as_str().to_string();
+            let sp = span(&nomo);
+
+            let mut etendo = None;
+            let mut kampoj = Vec::new();
+
+            for child in interno {
+                match child.as_rule() {
+                    Rule::identigilo => {
+                        etendo = Some(child.as_str().to_string());
+                    }
+                    Rule::kampo => {
+                        let mut k = child.into_inner();
+                        let vis = if k.peek().map_or(false, |p| p.as_rule() == Rule::pub_keyword)
+                        {
+                            k.next();
+                            Some(Visiblo::Publika)
+                        } else {
+                            None
+                        };
+                        let k_nomo = k.next().unwrap();
+                        let k_tipo = k.next().unwrap();
+                        kampoj.push(Kampo {
+                            nomo: Located::new(k_nomo.as_str().to_string(), span(&k_nomo)),
+                            tipo: parse_tipo(k_tipo),
+                            visiblo: vis,
+                        });
+                    }
+                    _ => {}
+                }
+            }
+
+            Some(Deklaro::Strk {
+                nomo: Located::new(nomo_str, sp),
+                etendo,
+                kampoj,
+            })
+        }
+        Rule::enumb_decl => {
+            let mut interno = pair.into_inner();
+            let nomo = interno.next().unwrap();
+            let nomo_str = nomo.as_str().to_string();
+            let sp = span(&nomo);
+
+            let mut variantoj = Vec::new();
+            for child in interno {
+                if child.as_rule() == Rule::enumb_variant {
+                    let mut v = child.into_inner();
+                    let v_nomo = v.next().unwrap();
+                    let mut tipoj = Vec::new();
+                    for t in v {
+                        tipoj.push(parse_tipo(t));
+                    }
+                    variantoj.push(Varianto {
+                        nomo: Located::new(v_nomo.as_str().to_string(), span(&v_nomo)),
+                        tipoj,
+                    });
+                }
+            }
+
+            Some(Deklaro::Enumb {
+                nomo: Located::new(nomo_str, sp),
+                variantoj,
+            })
+        }
+        Rule::realigu_decl => {
+            let mut interno = pair.into_inner();
+            let tipo = interno.next().unwrap();
+            let tipo_str = tipo.as_str().to_string();
+
+            let mut membroj = Vec::new();
+            for child in interno {
+                if let Some(d) = process_declaration(child) {
+                    membroj.push(d);
+                }
+            }
+
+            Some(Deklaro::Realigu {
+                tipo: tipo_str,
+                membroj,
+            })
+        }
+        Rule::trajto_decl => {
+            let mut interno = pair.into_inner();
+            let nomo = interno.next().unwrap();
+            let nomo_str = nomo.as_str().to_string();
+            let sp = span(&nomo);
+
+            let mut metodoj = Vec::new();
+            for child in interno {
+                if let Some(d) = process_declaration(child) {
+                    metodoj.push(d);
+                }
+            }
+
+            Some(Deklaro::Trajto {
+                nomo: Located::new(nomo_str, sp),
+                metodoj,
+            })
+        }
+        Rule::uzu_decl => {
+            let vojo = pair.into_inner().skip(1).next().unwrap().as_str().to_string();
+            Some(Deklaro::Uzu { vojo })
+        }
+        Rule::expr_stmt => {
+            let expr = parse_expr(pair.into_inner().next().unwrap());
+            Some(Deklaro::EsprimoStmt(expr))
+        }
+        Rule::se_stmt => {
+            let expr = parse_expr(pair.into_inner().next().unwrap());
+            Some(Deklaro::EsprimoStmt(expr))
+        }
+        Rule::dum_stmt => {
+            let expr = parse_expr(pair.into_inner().next().unwrap());
+            Some(Deklaro::EsprimoStmt(expr))
+        }
+        Rule::por_stmt => {
+            let expr = parse_expr(pair.into_inner().next().unwrap());
+            Some(Deklaro::EsprimoStmt(expr))
+        }
+        Rule::ripetu_stmt => {
+            let expr = parse_expr(pair.into_inner().next().unwrap());
+            Some(Deklaro::EsprimoStmt(expr))
+        }
+        Rule::kongruu_stmt => {
+            let expr = parse_expr(pair.into_inner().next().unwrap());
+            Some(Deklaro::EsprimoStmt(expr))
+        }
+        _ => None,
+    }
+}
+
+fn parse_tipo(pair: Pair<Rule>) -> Tipo {
+    match pair.as_rule() {
+        Rule::tipo_ent => {
+            let s = pair.as_str();
+            match &s[3..] {
+                "8" => Tipo::Ent8,
+                "16" => Tipo::Ent16,
+                "32" => Tipo::Ent32,
+                "64" => Tipo::Ent64,
+                "128" => Tipo::Ent128,
+                "g" => Tipo::EntG,
+                _ => unreachable!(),
+            }
+        }
+        Rule::tipo_nat => {
+            let s = pair.as_str();
+            match &s[3..] {
+                "8" => Tipo::Nat8,
+                "16" => Tipo::Nat16,
+                "32" => Tipo::Nat32,
+                "64" => Tipo::Nat64,
+                "128" => Tipo::Nat128,
+                "g" => Tipo::NatG,
+                _ => unreachable!(),
+            }
+        }
+        Rule::tipo_glit => {
+            let s = pair.as_str();
+            match &s[4..] {
+                "32" => Tipo::Glit32,
+                "64" => Tipo::Glit64,
+                _ => unreachable!(),
+            }
+        }
+        Rule::tipo_bulea => Tipo::Bulea,
+        Rule::tipo_kar => Tipo::Kar,
+        Rule::tipo_cen => Tipo::Ĉen,
+        Rule::tipo_teksto => Tipo::Teksto,
+        Rule::tipo_vektoro => {
+            let interno = pair.into_inner().next().unwrap();
+            Tipo::Vektoro(Box::new(parse_tipo(interno)))
+        }
+        Rule::tipo => {
+            let s = pair.as_str();
+            if s.starts_with('&') {
+                let mut interno = pair.into_inner();
+                let first = interno.next().unwrap();
+                let is_mut = first.as_rule() == Rule::sang_keyword;
+                let t = if is_mut {
+                    parse_tipo(interno.next().unwrap())
+                } else {
+                    parse_tipo(first)
+                };
+                if is_mut {
+                    Tipo::ReferencoŜanĝ(Box::new(t))
+                } else {
+                    Tipo::Referenco(Box::new(t))
+                }
+            } else {
+                let interno = pair.into_inner().next().unwrap();
+                match interno.as_rule() {
+                    Rule::tipo_ent | Rule::tipo_nat | Rule::tipo_glit | Rule::tipo_bulea
+                    | Rule::tipo_kar | Rule::tipo_cen | Rule::tipo_teksto | Rule::tipo_vektoro => {
+                        parse_tipo(interno)
+                    }
+                    _ => Tipo::Malferma(s.to_string()),
+                }
+            }
+        }
+        _ => Tipo::Malferma(pair.as_str().to_string()),
+    }
+}
+
+fn parse_expr(pair: Pair<Rule>) -> Esprimo {
+    match pair.as_rule() {
+        Rule::expr => {
+            let inner = pair.into_inner().next().unwrap();
+            parse_expr(inner)
+        }
+        Rule::literal => {
+            let lit = parse_literal(pair.clone());
+            Esprimo::Literal(Located::new(lit, span(&pair)))
+        }
+        Rule::identigilo => {
+            Esprimo::Identigilo(Located::new(pair.as_str().to_string(), span(&pair)))
+        }
+        Rule::asigno_expr => {
+            let mut interno = pair.into_inner();
+            let left = interno.next().unwrap();
+            if let Some(right) = interno.next() {
+                let right_expr = parse_expr(right);
+                Esprimo::Asigno(
+                    Box::new(parse_expr(left)),
+                    Box::new(right_expr),
+                )
+            } else {
+                parse_expr(left)
+            }
+        }
+        Rule::or_expr => {
+            let mut interno = pair.into_inner();
+            let mut left = parse_expr(interno.next().unwrap());
+            for op in interno {
+                let right = parse_expr(op);
+                left = Esprimo::Duarg(
+                    Box::new(left),
+                    Located::new(DuargOperaciilo::Au, (0, 0)),
+                    Box::new(right),
+                );
+            }
+            left
+        }
+        Rule::and_expr => {
+            let mut interno = pair.into_inner();
+            let mut left = parse_expr(interno.next().unwrap());
+            for op in interno {
+                let right = parse_expr(op);
+                left = Esprimo::Duarg(
+                    Box::new(left),
+                    Located::new(DuargOperaciilo::Kaj, (0, 0)),
+                    Box::new(right),
+                );
+            }
+            left
+        }
+        Rule::cmp_expr => {
+            let mut interno = pair.into_inner();
+            let left = parse_expr(interno.next().unwrap());
+            if let Some(op) = interno.next() {
+                let op_str = op.as_str();
+                let operaciilo = match op_str {
+                    "==" => DuargOperaciilo::Egala,
+                    "!=" => DuargOperaciilo::NeEgala,
+                    "<" => DuargOperaciilo::Malpli,
+                    "<=" => DuargOperaciilo::MalpliEgala,
+                    ">" => DuargOperaciilo::Pli,
+                    ">=" => DuargOperaciilo::PliEgala,
+                    _ => unreachable!(),
+                };
+                let right = parse_expr(interno.next().unwrap());
+                Esprimo::Duarg(
+                    Box::new(left),
+                    Located::new(operaciilo, span(&op)),
+                    Box::new(right),
+                )
+            } else {
+                left
+            }
+        }
+        Rule::add_expr => {
+            let mut interno = pair.into_inner();
+            let mut left = parse_expr(interno.next().unwrap());
+            while let Some(op) = interno.next() {
+                let op_str = op.as_str();
+                let operaciilo = match op_str {
+                    "+" => DuargOperaciilo::Aldoni,
+                    "-" => DuargOperaciilo::Subtrahi,
+                    _ => unreachable!(),
+                };
+                let right = parse_expr(interno.next().unwrap());
+                left = Esprimo::Duarg(
+                    Box::new(left),
+                    Located::new(operaciilo, (0, 0)),
+                    Box::new(right),
+                );
+            }
+            left
+        }
+        Rule::mul_expr => {
+            let mut interno = pair.into_inner();
+            let mut left = parse_expr(interno.next().unwrap());
+            while let Some(op) = interno.next() {
+                let op_str = op.as_str();
+                let operaciilo = match op_str {
+                    "*" => DuargOperaciilo::Multipliki,
+                    "/" => DuargOperaciilo::Dividi,
+                    "%" => DuargOperaciilo::Resto,
+                    _ => unreachable!(),
+                };
+                let right = parse_expr(interno.next().unwrap());
+                left = Esprimo::Duarg(
+                    Box::new(left),
+                    Located::new(operaciilo, (0, 0)),
+                    Box::new(right),
+                );
+            }
+            left
+        }
+        Rule::unary_expr => {
+            let mut interno = pair.into_inner();
+            let first = interno.next().unwrap();
+            match first.as_rule() {
+                Rule::unary_op => {
+                    let op_str = first.as_str();
+                    let expr = parse_expr(interno.next().unwrap());
+                    let operaciilo = match op_str {
+                        "-" => UnuargOperaciilo::Negi,
+                        "!" => UnuargOperaciilo::Ne,
+                        "&" => UnuargOperaciilo::Referenci,
+                        "*" => UnuargOperaciilo::Dereferenci,
+                        _ => unreachable!(),
+                    };
+                    Esprimo::Unuarg(Located::new(operaciilo, span(&first)), Box::new(expr))
+                }
+                Rule::voko_expr => parse_expr(first),
+                _ => parse_expr(first),
+            }
+        }
+        Rule::voko_expr => {
+            let mut interno = pair.into_inner();
+            let atomo = parse_expr(interno.next().unwrap());
+            let mut result = atomo;
+            for suf in interno {
+                match suf.as_rule() {
+                Rule::voko_sufikso => {
+                    let is_macro = suf.as_str().starts_with('!');
+                    let mut args = Vec::new();
+                    for inner in suf.into_inner() {
+                        if inner.as_rule() == Rule::expr_list {
+                            for expr in inner.into_inner() {
+                                args.push(parse_expr(expr));
+                            }
+                        } else {
+                            args.push(parse_expr(inner));
+                        }
+                    }
+                    if is_macro {
+                        result = Esprimo::Makro(Box::new(result), args);
+                    } else {
+                        result = Esprimo::Voko(Box::new(result), args);
+                    }
+                }
+                    _ => {}
+                }
+            }
+            result
+        }
+        Rule::se_expr => {
+            let mut interno = pair.into_inner();
+            // skip se_keyword
+            if interno.peek().map_or(false, |p| p.as_rule() == Rule::se_keyword) {
+                interno.next();
+            }
+            let kond = parse_expr(interno.next().unwrap());
+            let tiam = parse_block(interno.next().unwrap());
+            let alie = if interno.peek().map_or(false, |p| p.as_rule() == Rule::alie_keyword) {
+                interno.next();
+                Some(parse_block(interno.next().unwrap()))
+            } else {
+                None
+            };
+            Esprimo::Se(Box::new(kond), tiam, alie)
+        }
+        Rule::dum_expr => {
+            let mut interno = pair.into_inner();
+            // skip dum_keyword
+            if interno.peek().map_or(false, |p| p.as_rule() == Rule::dum_keyword) {
+                interno.next();
+            }
+            let kond = parse_expr(interno.next().unwrap());
+            let korpo = parse_block(interno.next().unwrap());
+            Esprimo::Dum(Box::new(kond), korpo)
+        }
+        Rule::por_expr => {
+            let mut interno = pair.into_inner();
+            // skip por_keyword
+            if interno.peek().map_or(false, |p| p.as_rule() == Rule::por_keyword) {
+                interno.next();
+            }
+            let var = interno.next().unwrap();
+            // skip en_keyword
+            if interno.peek().map_or(false, |p| p.as_rule() == Rule::en_keyword) {
+                interno.next();
+            }
+            let kolekto = parse_expr(interno.next().unwrap());
+            let korpo = parse_block(interno.next().unwrap());
+            Esprimo::Por(
+                Located::new(var.as_str().to_string(), span(&var)),
+                Box::new(kolekto),
+                korpo,
+            )
+        }
+        Rule::ripetu_expr => {
+            let mut interno = pair.into_inner();
+            // skip ripetu_keyword
+            if interno.peek().map_or(false, |p| p.as_rule() == Rule::ripetu_keyword) {
+                interno.next();
+            }
+            let bloko = interno.next().unwrap();
+            Esprimo::Ripetu(parse_block(bloko))
+        }
+        Rule::kongruu_expr => {
+            let mut interno = pair.into_inner();
+            // skip kongruu_keyword
+            if interno.peek().map_or(false, |p| p.as_rule() == Rule::kongruu_keyword) {
+                interno.next();
+            }
+            let expr = parse_expr(interno.next().unwrap());
+            let mut brakoj = Vec::new();
+            for br in interno {
+                let mut br_inner = br.into_inner();
+                let patrono = parse_patrono(br_inner.next().unwrap());
+                let korpo = parse_block(br_inner.next().unwrap());
+                brakoj.push(Brako { patrono, korpo });
+            }
+            Esprimo::Kongruu(Box::new(expr), brakoj)
+        }
+        Rule::redonu_expr => {
+            let mut interno = pair.into_inner();
+            // skip redonu_keyword
+            if interno.peek().map_or(false, |p| p.as_rule() == Rule::redonu_keyword) {
+                interno.next();
+            }
+            let expr = interno.next().map(|e| parse_expr(e));
+            Esprimo::Redonu(Box::new(expr.unwrap_or_else(|| {
+                Esprimo::Bloko(Vec::new())
+            })))
+        }
+        Rule::atomo => {
+            let inner = pair.into_inner().next().unwrap();
+            parse_expr(inner)
+        }
+        Rule::expr_list => {
+            parse_expr(pair.into_inner().next().unwrap())
+        }
+        Rule::bloko => Esprimo::Bloko(parse_block(pair)),
+        _ => Esprimo::Bloko(Vec::new()),
+    }
+}
+
+fn parse_literal(pair: Pair<Rule>) -> Literal {
+    let inner = pair.into_inner().next().unwrap();
+    match inner.as_rule() {
+        Rule::integer_literal => {
+            Literal::Ent(IntegerBase::Dekuma, inner.as_str().to_string())
+        }
+        Rule::float_literal => {
+            Literal::Glit(inner.as_str().to_string())
+        }
+        Rule::string_literal => {
+            let s = inner.as_str();
+            Literal::Teksta(s[1..s.len() - 1].to_string())
+        }
+        Rule::char_literal => {
+            let s = inner.as_str();
+            let c = s.chars().nth(1).unwrap_or(' ');
+            Literal::Kara(c)
+        }
+        Rule::bool_literal => {
+            Literal::Bulea(inner.as_str() == "vera")
+        }
+        _ => unreachable!(),
+    }
+}
+
+fn parse_patrono(pair: Pair<Rule>) -> Patrono {
+    let inner = pair.into_inner().next().unwrap();
+    let sp = span(&inner);
+    match inner.as_rule() {
+        Rule::literal => Patrono::Literal(Located::new(parse_literal(inner), sp)),
+        Rule::identigilo => Patrono::Identigilo(Located::new(inner.as_str().to_string(), sp)),
+        _ => Patrono::Ĉio,
+    }
+}
+
+fn parse_block(pair: Pair<Rule>) -> Vec<Deklaro> {
+    let mut deklaroj = Vec::new();
+    for child in pair.into_inner() {
+        if let Some(d) = process_declaration(child) {
+            deklaroj.push(d);
+        }
+    }
+    deklaroj
+}
+
+======================================================================
+ crates/resp-parser/tests/parse_test.rs
+======================================================================
+use resp_parser::{RespParser, parse_programo};
+use pest::Parser;
+
+fn print_pairs(pair: &pest::iterators::Pair<resp_parser::Rule>, depth: usize) {
+    let indent = "  ".repeat(depth);
+    eprintln!("{}{:?} = '{}'", indent, pair.as_rule(), pair.as_str().escape_debug());
+    for child in pair.clone().into_inner() {
+        print_pairs(&child, depth + 1);
+    }
+}
+
+#[test]
+fn debug_parse_simple() {
+    let source = r#"uzu std::io;
+
+fk ĉefa() {
+    estu nomo: Teksto = "Mondo";
+}
+"#;
+    let result = RespParser::parse(resp_parser::Rule::program, source);
+    match result {
+        Ok(pairs) => {
+            for pair in pairs {
+                print_pairs(&pair, 0);
+            }
+        }
+        Err(e) => eprintln!("Parse error: {}", e),
+    }
+    let prog = parse_programo(source).unwrap();
+    eprintln!("Declarations: {}", prog.deklaroj.len());
+    for d in &prog.deklaroj {
+        eprintln!("  {:?}", d);
+    }
+}
+
+======================================================================
+ crates/resp-transpiler/Cargo.toml
+======================================================================
+[package]
+name = "resp-transpiler"
+version.workspace = true
+edition.workspace = true
+description.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
+resp-ast = { path = "../resp-ast" }
+syn = { version = "2", features = ["full", "extra-traits"] }
+quote = "1"
+proc-macro2 = "1"
+
+======================================================================
+ crates/resp-transpiler/src/lib.rs
+======================================================================
+//! Transpiler from Resp AST to Rust source code.
+//!
+//! Uses `syn` and `quote` to generate Rust token streams
+//! from the AST defined in `resp-ast`.
+
+use proc_macro2::TokenStream;
+use quote::quote;
+use resp_ast::*;
+
+pub fn transpile(programo: &Programo) -> TokenStream {
+    let mut tokens = TokenStream::new();
+    for deklaro in &programo.deklaroj {
+        tokens.extend(transpile_deklaro(deklaro));
+    }
+    tokens
+}
+
+fn map_nomo(s: &str) -> String {
+    match s {
+        "ĉefa" => "main".to_string(),
+        _ => s.to_string(),
+    }
+}
+
+fn transpile_deklaro(deklaro: &Deklaro) -> TokenStream {
+    match deklaro {
+        Deklaro::Uzu { vojo } => {
+            let parts: Vec<&str> = vojo.split("::").collect();
+            if parts.last() == Some(&"*") {
+                let idents: Vec<syn::Ident> = parts[..parts.len() - 1].iter()
+                    .map(|s| syn::Ident::new(s, proc_macro2::Span::call_site()))
+                    .collect();
+                let last = &idents[..];
+                quote! { use #(#last)::*; }
+            } else {
+                let idents: Vec<syn::Ident> = parts.iter()
+                    .map(|s| syn::Ident::new(s, proc_macro2::Span::call_site()))
+                    .collect();
+                let first = &idents[0];
+                let rest = &idents[1..];
+                quote! { use #first #(::#rest)*; }
+            }
+        }
+        Deklaro::Estu(nomo, tipo, expr, mutebla) => {
+            let nomo_ident = syn::Ident::new(&nomo.value, proc_macro2::Span::call_site());
+            let tip = tipo.as_ref().map(map_tipo);
+            let mut ekspr = expr.as_ref().map(transpile_expr);
+            // Auto-convert &str to String when target type is String
+            if let (Some(&Tipo::Teksto), Some(e)) = (tipo.as_ref(), &ekspr) {
+                let e_str = e.to_string();
+                if e_str.starts_with('"') {
+                    let inner = e_str.trim_matches('"');
+                    let lit = proc_macro2::Literal::string(inner);
+                    ekspr = Some(quote! { #lit.to_string() });
+                }
+            }
+            if *mutebla {
+                match (tip, ekspr) {
+                    (Some(t), Some(e)) => quote! { let mut #nomo_ident: #t = #e; },
+                    (Some(t), None) => quote! { let mut #nomo_ident: #t = Default::default(); },
+                    (None, Some(e)) => quote! { let mut #nomo_ident = #e; },
+                    (None, None) => quote! { let mut #nomo_ident = (); },
+                }
+            } else {
+                match (tip, ekspr) {
+                    (Some(t), Some(e)) => quote! { let #nomo_ident: #t = #e; },
+                    (Some(t), None) => quote! { let #nomo_ident: #t = Default::default(); },
+                    (None, Some(e)) => quote! { let #nomo_ident = #e; },
+                    (None, None) => quote! { let #nomo_ident = (); },
+                }
+            }
+        }
+        Deklaro::Funkcio { nomo, parametroj, reveno, korpo } => {
+            let nomo_ident = syn::Ident::new(&map_nomo(&nomo.value), proc_macro2::Span::call_site());
+            let params: Vec<_> = parametroj.iter().map(|p| {
+                let p_ident = syn::Ident::new(&p.nomo.value, proc_macro2::Span::call_site());
+                let p_tipo = p.tipo.as_ref().map(map_tipo);
+                quote! { #p_ident: #p_tipo }
+            }).collect();
+            let ret = reveno.as_ref().map(map_tipo);
+            let korpo_tokens: Vec<_> = korpo.iter().map(|d| transpile_deklaro(d)).collect();
+            if let Some(r) = &ret {
+                quote! {
+                    fn #nomo_ident(#(#params),*) -> #r {
+                        #(#korpo_tokens)*
+                    }
+                }
+            } else {
+                quote! {
+                    fn #nomo_ident(#(#params),*) {
+                        #(#korpo_tokens)*
+                    }
+                }
+            }
+        }
+        Deklaro::Strk { nomo, etendo, kampoj } => {
+            let nomo_ident = syn::Ident::new(&nomo.value, proc_macro2::Span::call_site());
+            let kampoj_tokens: Vec<_> = kampoj.iter().map(|k| {
+                let k_ident = syn::Ident::new(&k.nomo.value, proc_macro2::Span::call_site());
+                let k_tipo = map_tipo(&k.tipo);
+                let pub_attr = match k.visiblo {
+                    Some(Visiblo::Publika) => quote! { pub },
+                    _ => quote! {},
+                };
+                if let Some(_ext) = etendo {
+                    // Inheritance via composition: will be expanded
+                }
+                quote! { #pub_attr #k_ident: #k_tipo }
+            }).collect();
+            quote! {
+                struct #nomo_ident {
+                    #(#kampoj_tokens),*
+                }
+            }
+        }
+        Deklaro::Enumb { nomo, variantoj } => {
+            let nomo_ident = syn::Ident::new(&nomo.value, proc_macro2::Span::call_site());
+            let variant_tokens: Vec<_> = variantoj.iter().map(|v| {
+                let v_ident = syn::Ident::new(&v.nomo.value, proc_macro2::Span::call_site());
+                let v_tipoj: Vec<_> = v.tipoj.iter().map(map_tipo).collect();
+                if v_tipoj.is_empty() {
+                    quote! { #v_ident }
+                } else {
+                    quote! { #v_ident(#(#v_tipoj),*) }
+                }
+            }).collect();
+            quote! {
+                enum #nomo_ident {
+                    #(#variant_tokens),*
+                }
+            }
+        }
+        Deklaro::Realigu { tipo, membroj } => {
+            let tipo_ident: syn::Ident = syn::Ident::new(tipo, proc_macro2::Span::call_site());
+            let membroj_tokens: Vec<_> = membroj.iter().map(|d| transpile_deklaro(d)).collect();
+            quote! {
+                impl #tipo_ident {
+                    #(#membroj_tokens)*
+                }
+            }
+        }
+        Deklaro::Trajto { nomo, metodoj } => {
+            let nomo_ident = syn::Ident::new(&nomo.value, proc_macro2::Span::call_site());
+            let metodoj_tokens: Vec<_> = metodoj.iter().map(|d| {
+                if let Deklaro::Funkcio { nomo, parametroj, reveno, .. } = d {
+                    let nom_ident = syn::Ident::new(&nomo.value, proc_macro2::Span::call_site());
+                    let params: Vec<_> = parametroj.iter().map(|p| {
+                        let p_ident = syn::Ident::new(&p.nomo.value, proc_macro2::Span::call_site());
+                        let p_tipo = p.tipo.as_ref().map(map_tipo);
+                        quote! { #p_ident: #p_tipo }
+                    }).collect();
+                    let ret = reveno.as_ref().map(map_tipo);
+                    if let Some(r) = &ret {
+                        quote! { fn #nom_ident(#(#params)*) -> #r; }
+                    } else {
+                        quote! { fn #nom_ident(#(#params)*); }
+                    }
+                } else {
+                    TokenStream::new()
+                }
+            }).collect();
+            quote! {
+                trait #nomo_ident {
+                    #(#metodoj_tokens)*
+                }
+            }
+        }
+        Deklaro::EsprimoStmt(expr) => {
+            let e = transpile_expr(expr);
+            match expr {
+                Esprimo::Se(..) | Esprimo::Dum(..) | Esprimo::Por(..)
+                    | Esprimo::Ripetu(..) | Esprimo::Kongruu(..) => quote! { #e },
+                _ => quote! { #e; },
+            }
+        }
+        Deklaro::Komento(_) => TokenStream::new(),
+    }
+}
+
+fn transpile_expr(expr: &Esprimo) -> TokenStream {
+    match expr {
+        Esprimo::Literal(lit) => {
+            match &lit.value {
+                Literal::Ent(_, v) => {
+                    let n: syn::LitInt = syn::parse_str(v).unwrap();
+                    quote! { #n }
+                }
+                Literal::Glit(v) => {
+                    let n: syn::LitFloat = syn::parse_str(v).unwrap();
+                    quote! { #n }
+                }
+                Literal::Teksta(v) => {
+                    let lit = proc_macro2::Literal::string(v);
+                    quote! { #lit }
+                }
+                Literal::Kara(c) => {
+                    let lit = proc_macro2::Literal::character(*c);
+                    quote! { #lit }
+                }
+                Literal::Bulea(v) => {
+                    if *v { quote! { true } } else { quote! { false } }
+                }
+            }
+        }
+        Esprimo::Identigilo(id) => {
+            let ident = syn::Ident::new(&id.value, proc_macro2::Span::call_site());
+            quote! { #ident }
+        }
+        Esprimo::Unuarg(op, expr) => {
+            let e = transpile_expr(expr);
+            match &op.value {
+                UnuargOperaciilo::Negi => quote! { -#e },
+                UnuargOperaciilo::Ne => quote! { !#e },
+                UnuargOperaciilo::Referenci => quote! { &#e },
+                UnuargOperaciilo::Dereferenci => quote! { *#e },
+            }
+        }
+        Esprimo::Duarg(left, op, right) => {
+            let l = transpile_expr(left);
+            let r = transpile_expr(right);
+            let op_str = match &op.value {
+                DuargOperaciilo::Aldoni => quote! { + },
+                DuargOperaciilo::Subtrahi => quote! { - },
+                DuargOperaciilo::Multipliki => quote! { * },
+                DuargOperaciilo::Dividi => quote! { / },
+                DuargOperaciilo::Resto => quote! { % },
+                DuargOperaciilo::Egala => quote! { == },
+                DuargOperaciilo::NeEgala => quote! { != },
+                DuargOperaciilo::Malpli => quote! { < },
+                DuargOperaciilo::MalpliEgala => quote! { <= },
+                DuargOperaciilo::Pli => quote! { > },
+                DuargOperaciilo::PliEgala => quote! { >= },
+                DuargOperaciilo::Kaj => quote! { && },
+                DuargOperaciilo::Au => quote! { || },
+            };
+            quote! { #l #op_str #r }
+        }
+        Esprimo::Asigno(left, right) => {
+            let l = transpile_expr(left);
+            let r = transpile_expr(right);
+            quote! { #l = #r }
+        }
+        Esprimo::Voko(func, args) => {
+            let f = transpile_expr(func);
+            let a: Vec<_> = args.iter().map(transpile_expr).collect();
+            quote! { #f(#(#a),*) }
+        }
+        Esprimo::Makro(func, args) => {
+            let f = transpile_expr(func);
+            let a: Vec<_> = args.iter().map(transpile_expr).collect();
+            quote! { #f!(#(#a),*) }
+        }
+        Esprimo::Membro(obj, field) => {
+            let o = transpile_expr(obj);
+            let f = syn::Ident::new(&field.value, proc_macro2::Span::call_site());
+            quote! { #o.#f }
+        }
+        Esprimo::Indekso(arr, idx) => {
+            let a = transpile_expr(arr);
+            let i = transpile_expr(idx);
+            quote! { #a[#i] }
+        }
+        Esprimo::Bloko(deklaroj) => {
+            let d: Vec<_> = deklaroj.iter().map(|d| transpile_deklaro(d)).collect();
+            quote! { { #(#d)* } }
+        }
+        Esprimo::Se(kond, tiam, alie) => {
+            let k = transpile_expr(kond);
+            let t: Vec<_> = tiam.iter().map(|d| transpile_deklaro(d)).collect();
+            match alie {
+                Some(a) => {
+                    let a_tokens: Vec<_> = a.iter().map(|d| transpile_deklaro(d)).collect();
+                    quote! { if #k { #(#t)* } else { #(#a_tokens)* } }
+                }
+                None => quote! { if #k { #(#t)* } },
+            }
+        }
+        Esprimo::Dum(kond, korpo) => {
+            let k = transpile_expr(kond);
+            let k_tokens: Vec<_> = korpo.iter().map(|d| transpile_deklaro(d)).collect();
+            quote! { while #k { #(#k_tokens)* } }
+        }
+        Esprimo::Por(var, kolekto, korpo) => {
+            let v = syn::Ident::new(&var.value, proc_macro2::Span::call_site());
+            let k = transpile_expr(kolekto);
+            let k_tokens: Vec<_> = korpo.iter().map(|d| transpile_deklaro(d)).collect();
+            quote! { for #v in #k { #(#k_tokens)* } }
+        }
+        Esprimo::Ripetu(korpo) => {
+            let k_tokens: Vec<_> = korpo.iter().map(|d| transpile_deklaro(d)).collect();
+            quote! { loop { #(#k_tokens)* } }
+        }
+        Esprimo::Kongruu(expr, brakoj) => {
+            let e = transpile_expr(expr);
+            let b: Vec<_> = brakoj.iter().map(|br| {
+                let patrono = transpile_patrono(&br.patrono);
+                let korpo: Vec<_> = br.korpo.iter().map(|d| transpile_deklaro(d)).collect();
+                quote! { #patrono => { #(#korpo)* } }
+            }).collect();
+            quote! { match #e { #(#b)* } }
+        }
+        Esprimo::Redonu(expr) => {
+            let e = transpile_expr(expr);
+            quote! { return #e }
+        }
+        Esprimo::Provu(try_block, catch_block) => {
+            let t: Vec<_> = try_block.iter().map(|d| transpile_deklaro(d)).collect();
+            match catch_block {
+                Some(_c) => {
+                    quote! { { #(#t)* } }
+                }
+                None => {
+                    quote! { { #(#t)* } }
+                }
+            }
+        }
+        Esprimo::Kreis(_) | Esprimo::Kreu(_) => {
+            quote! { todo!() }
+        }
+    }
+}
+
+fn transpile_patrono(patrono: &Patrono) -> TokenStream {
+    match patrono {
+        Patrono::Ĉio => quote! { _ },
+        Patrono::Literal(lit) => transpile_expr(&Esprimo::Literal(lit.clone())),
+        Patrono::Identigilo(id) => {
+            let ident = syn::Ident::new(&id.value, proc_macro2::Span::call_site());
+            quote! { #ident }
+        }
+        Patrono::Varianto(name, args) => {
+            let ident = syn::Ident::new(&name.value, proc_macro2::Span::call_site());
+            match args {
+                Some(a) => {
+                    let a_tokens: Vec<_> = a.iter().map(transpile_patrono).collect();
+                    quote! { #ident(#(#a_tokens),*) }
+                }
+                None => quote! { #ident },
+            }
+        }
+        Patrono::Kondiĉa(p, _) => transpile_patrono(p),
+    }
+}
+
+fn map_tipo(tipo: &Tipo) -> TokenStream {
+    match tipo {
+        Tipo::Ent8 => quote! { i8 },
+        Tipo::Ent16 => quote! { i16 },
+        Tipo::Ent32 => quote! { i32 },
+        Tipo::Ent64 => quote! { i64 },
+        Tipo::Ent128 => quote! { i128 },
+        Tipo::EntG => quote! { isize },
+        Tipo::Nat8 => quote! { u8 },
+        Tipo::Nat16 => quote! { u16 },
+        Tipo::Nat32 => quote! { u32 },
+        Tipo::Nat64 => quote! { u64 },
+        Tipo::Nat128 => quote! { u128 },
+        Tipo::NatG => quote! { usize },
+        Tipo::Glit32 => quote! { f32 },
+        Tipo::Glit64 => quote! { f64 },
+        Tipo::Bulea => quote! { bool },
+        Tipo::Kar => quote! { char },
+        Tipo::Ĉen => quote! { str },
+        Tipo::Teksto => quote! { String },
+        Tipo::Vektoro(t) => {
+            let inner = map_tipo(t);
+            quote! { Vec<#inner> }
+        }
+        Tipo::Nombrita(n, generics) => {
+            let ident = syn::Ident::new(n, proc_macro2::Span::call_site());
+            if generics.is_empty() {
+                quote! { #ident }
+            } else {
+                let g: Vec<_> = generics.iter().map(map_tipo).collect();
+                quote! { #ident<#(#g),*> }
+            }
+        }
+        Tipo::Referenco(t) => {
+            let inner = map_tipo(t).to_string();
+            format!("&{}", inner).parse().unwrap()
+        }
+        Tipo::ReferencoŜanĝ(t) => {
+            let inner = map_tipo(t).to_string();
+            format!("&mut {}", inner).parse().unwrap()
+        }
+        Tipo::Malferma(n) => {
+            let ident = syn::Ident::new(n, proc_macro2::Span::call_site());
+            quote! { #ident }
+        }
+    }
+}
+
+======================================================================
+ crates/resp-cli/Cargo.toml
+======================================================================
+[package]
+name = "resp-cli"
+version.workspace = true
+edition.workspace = true
+description.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
+resp-parser = { path = "../resp-parser" }
+resp-transpiler = { path = "../resp-transpiler" }
+clap = { version = "4", features = ["derive"] }
+
+======================================================================
+ crates/resp-cli/src/main.rs
+======================================================================
+use clap::Parser;
+use resp_parser::parse_programo;
+use resp_transpiler::transpile;
+use std::fs;
+use std::path::PathBuf;
+#[derive(Parser)]
+#[command(name = "resp", version, about = "Resp - Esperanto to Rust transpiler")]
+struct Cli {
+    #[arg(short = 'o')]
+    output: Option<PathBuf>,
+
+    #[arg(long)]
+    compile: bool,
+
+    #[arg(long)]
+    fmt: bool,
+
+    file: PathBuf,
+}
+
+fn main() {
+    let cli = Cli::parse();
+
+    let source = fs::read_to_string(&cli.file)
+        .expect("Failed to read source file");
+
+    let programo = parse_programo(&source).unwrap_or_else(|e| {
+        eprintln!("Parse error: {}", e);
+        std::process::exit(1);
+    });
+
+    let rust_tokens = transpile(&programo);
+    let rust_source = rust_tokens.to_string();
+
+    let output_path = cli.output.unwrap_or_else(|| {
+        cli.file.with_extension("rs")
+    });
+
+    fs::write(&output_path, &rust_source)
+        .expect("Failed to write output file");
+
+    println!("Transpiled to {}", output_path.display());
+
+    if cli.fmt {
+        let status = std::process::Command::new("rustfmt")
+            .arg(&output_path)
+            .status()
+            .expect("Failed to run rustfmt");
+        if !status.success() {
+            eprintln!("Warning: rustfmt failed");
+        }
+    }
+
+    if cli.compile {
+        let status = std::process::Command::new("rustc")
+            .arg(&output_path)
+            .arg("-o")
+            .arg(output_path.with_extension(""))
+            .status()
+            .expect("Failed to run rustc");
+        if !status.success() {
+            std::process::exit(1);
+        }
+        println!("Compiled to {}", output_path.with_extension("").display());
+    }
+}
+
+======================================================================
+ examples/hello.resp
+======================================================================
+uzu std::io;
+
+fk saluton(nomo: &ĉen) {
+    println!("Saluton, {}!", nomo);
+}
+
+fk ĉefa() {
+    estu nomo: Teksto = "Mondo";
+    saluton(&nomo);
+}
+
+======================================================================
+ examples/fibonacci.resp
+======================================================================
+fk fibonacco(n: ent32) -> ent32 {
+    se n <= 1 {
+        redonu n;
+    }
+    redonu fibonacco(n - 1) + fibonacco(n - 2);
+}
+
+fk ĉefa() {
+    estu rezulto: ent32 = fibonacco(10);
+    println!("Fibonacci(10) = {}", rezulto);
+}
