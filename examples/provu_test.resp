@@ -1,0 +1,17 @@
+fk eble_fiaski(should_fail: bulea) -> Result<i32, String> {
+    se should_fail {
+        redonu Err("Io misfunkciis!".to_string());
+    }
+    redonu Ok(42);
+}
+
+fk main() {
+    estu ŝanĝ rezulto: ent32;
+
+    provu {
+        rezulto = eble_fiaski(malvera)?;
+        println!("Sukcesis! Rezulto: {}", rezulto);
+    } kaptu {
+        println!("Kaptita eraron: Io misfunkciis!");
+    }
+}

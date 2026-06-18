@@ -1,0 +1,12 @@
+fk procesi(valoro: ent32) -> ĉen {
+    redonu "ent32";
+}
+
+fk procesi(valoro: glit64) -> ĉen {
+    redonu "glit64";
+}
+
+fk main() {
+    println!("{}", procesi(42));
+    println!("{}", procesi(3.14));
+}

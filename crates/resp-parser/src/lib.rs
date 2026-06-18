@@ -75,7 +75,6 @@ fn process_declaration(pair: Pair<Rule>) -> Option<Deklaro> {
         }
         Rule::funkcio_decl => {
             let mut interno = pair.into_inner();
-            // skip keyword pairs (pub_keyword?, fk_keyword) to get to identigilo
             let mut nomo_str = String::new();
             let mut sp = (0, 0);
             let mut parametroj = Vec::new();
@@ -94,9 +93,16 @@ fn process_declaration(pair: Pair<Rule>) -> Option<Deklaro> {
                                 let mut p = param.into_inner();
                                 let p_nomo = p.next().unwrap();
                                 let p_tipo = p.next().unwrap();
+                                let mut def_val = None;
+                                if let Some(next) = p.next() {
+                                    if next.as_rule() == Rule::expr {
+                                        def_val = Some(parse_expr(next));
+                                    }
+                                }
                                 parametroj.push(Parametro {
                                     nomo: Located::new(p_nomo.as_str().to_string(), span(&p_nomo)),
                                     tipo: Some(parse_tipo(p_tipo)),
+                                    valor_defecto: def_val,
                                 });
                             }
                         }
@@ -229,6 +235,23 @@ fn process_declaration(pair: Pair<Rule>) -> Option<Deklaro> {
             let vojo = pair.into_inner().skip(1).next().unwrap().as_str().to_string();
             Some(Deklaro::Uzu { vojo })
         }
+        Rule::provu_stmt => {
+            let interno: Vec<_> = pair.into_inner().collect();
+            let mut idx = 0;
+            if idx < interno.len() && interno[idx].as_rule() == Rule::provu_keyword {
+                idx += 1;
+            }
+            let try_block = parse_block(interno[idx].clone());
+            idx += 1;
+            let catch_block = if idx < interno.len() && interno[idx].as_rule() == Rule::kaptu_keyword {
+                idx += 1;
+                Some(parse_block(interno[idx].clone()))
+            } else {
+                None
+            };
+            let expr = Esprimo::Provu(Box::new(Esprimo::Bloko(try_block)), catch_block);
+            Some(Deklaro::EsprimoStmt(expr))
+        }
         Rule::expr_stmt => {
             let expr = parse_expr(pair.into_inner().next().unwrap());
             Some(Deklaro::EsprimoStmt(expr))
@@ -316,11 +339,25 @@ fn parse_tipo(pair: Pair<Rule>) -> Tipo {
                     Tipo::Referenco(Box::new(t))
                 }
             } else {
-                let interno = pair.into_inner().next().unwrap();
-                match interno.as_rule() {
+                let mut interno_iter = pair.into_inner();
+                let first = interno_iter.next().unwrap();
+                match first.as_rule() {
                     Rule::tipo_ent | Rule::tipo_nat | Rule::tipo_glit | Rule::tipo_bulea
                     | Rule::tipo_kar | Rule::tipo_cen | Rule::tipo_teksto | Rule::tipo_vektoro => {
-                        parse_tipo(interno)
+                        parse_tipo(first)
+                    }
+                    Rule::identigilo => {
+                        let name = first.as_str().to_string();
+                        if let Some(list) = interno_iter.next() {
+                            if list.as_rule() == Rule::tipo_list {
+                                let generics: Vec<Tipo> = list.into_inner().map(parse_tipo).collect();
+                                Tipo::Nombrita(name, generics)
+                            } else {
+                                Tipo::Malferma(name)
+                            }
+                        } else {
+                            Tipo::Malferma(name)
+                        }
                     }
                     _ => Tipo::Malferma(s.to_string()),
                 }
@@ -472,7 +509,45 @@ fn parse_expr(pair: Pair<Rule>) -> Esprimo {
             for suf in interno {
                 match suf.as_rule() {
                 Rule::voko_sufikso => {
-                    let is_macro = suf.as_str().starts_with('!');
+                    let suf_str = suf.as_str();
+                    if suf_str == "?" {
+                        result = Esprimo::Unuarg(
+                            Located::new(UnuargOperaciilo::Demandilo, span(&suf)),
+                            Box::new(result),
+                        );
+                        continue;
+                    }
+                    if suf_str.starts_with(".") {
+                        let mut inner_iter = suf.into_inner();
+                        let field = inner_iter.next().unwrap();
+                        let field_str = field.as_str().to_string();
+                        let field_span = span(&field);
+                        // Check if this is a method call (has parentheses)
+                        let is_method_call = suf_str.contains('(');
+                        if is_method_call {
+                            let mut args = Vec::new();
+                            if let Some(args_pair) = inner_iter.next() {
+                                if args_pair.as_rule() == Rule::expr_list {
+                                    for expr in args_pair.into_inner() {
+                                        args.push(parse_expr(expr));
+                                    }
+                                }
+                            }
+                            let member = Esprimo::Membro(
+                                Box::new(result),
+                                Located::new(field_str, field_span),
+                            );
+                            result = Esprimo::Voko(Box::new(member), args);
+                        } else {
+                            // Plain field access
+                            result = Esprimo::Membro(
+                                Box::new(result),
+                                Located::new(field_str, field_span),
+                            );
+                        }
+                        continue;
+                    }
+                    let is_macro = suf_str.starts_with('!');
                     let mut args = Vec::new();
                     for inner in suf.into_inner() {
                         if inner.as_rule() == Rule::expr_list {
@@ -494,9 +569,22 @@ fn parse_expr(pair: Pair<Rule>) -> Esprimo {
             }
             result
         }
+        Rule::provu_expr => {
+            let mut interno = pair.into_inner();
+            if interno.peek().map_or(false, |p| p.as_rule() == Rule::provu_keyword) {
+                interno.next();
+            }
+            let try_body = parse_block(interno.next().unwrap());
+            let catch_block = if interno.peek().map_or(false, |p| p.as_rule() == Rule::kaptu_keyword) {
+                interno.next();
+                Some(parse_block(interno.next().unwrap()))
+            } else {
+                None
+            };
+            Esprimo::Provu(Box::new(Esprimo::Bloko(try_body)), catch_block)
+        }
         Rule::se_expr => {
             let mut interno = pair.into_inner();
-            // skip se_keyword
             if interno.peek().map_or(false, |p| p.as_rule() == Rule::se_keyword) {
                 interno.next();
             }
@@ -512,7 +600,6 @@ fn parse_expr(pair: Pair<Rule>) -> Esprimo {
         }
         Rule::dum_expr => {
             let mut interno = pair.into_inner();
-            // skip dum_keyword
             if interno.peek().map_or(false, |p| p.as_rule() == Rule::dum_keyword) {
                 interno.next();
             }
@@ -522,12 +609,10 @@ fn parse_expr(pair: Pair<Rule>) -> Esprimo {
         }
         Rule::por_expr => {
             let mut interno = pair.into_inner();
-            // skip por_keyword
             if interno.peek().map_or(false, |p| p.as_rule() == Rule::por_keyword) {
                 interno.next();
             }
             let var = interno.next().unwrap();
-            // skip en_keyword
             if interno.peek().map_or(false, |p| p.as_rule() == Rule::en_keyword) {
                 interno.next();
             }
@@ -541,7 +626,6 @@ fn parse_expr(pair: Pair<Rule>) -> Esprimo {
         }
         Rule::ripetu_expr => {
             let mut interno = pair.into_inner();
-            // skip ripetu_keyword
             if interno.peek().map_or(false, |p| p.as_rule() == Rule::ripetu_keyword) {
                 interno.next();
             }
@@ -550,7 +634,6 @@ fn parse_expr(pair: Pair<Rule>) -> Esprimo {
         }
         Rule::kongruu_expr => {
             let mut interno = pair.into_inner();
-            // skip kongruu_keyword
             if interno.peek().map_or(false, |p| p.as_rule() == Rule::kongruu_keyword) {
                 interno.next();
             }
@@ -566,7 +649,6 @@ fn parse_expr(pair: Pair<Rule>) -> Esprimo {
         }
         Rule::redonu_expr => {
             let mut interno = pair.into_inner();
-            // skip redonu_keyword
             if interno.peek().map_or(false, |p| p.as_rule() == Rule::redonu_keyword) {
                 interno.next();
             }

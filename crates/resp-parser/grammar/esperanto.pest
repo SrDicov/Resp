@@ -11,6 +11,7 @@ declaration = {
     | trajto_decl
     | estu_decl
     | uzu_decl
+    | provu_stmt
     | se_stmt
     | dum_stmt
     | por_stmt
@@ -19,6 +20,7 @@ declaration = {
     | expr_stmt
 }
 
+provu_stmt = { provu_keyword ~ bloko ~ (kaptu_keyword ~ bloko)? }
 se_stmt = { se_expr }
 dum_stmt = { dum_expr }
 por_stmt = { por_expr }
@@ -69,8 +71,10 @@ tipo = {
     | tipo_teksto
     | tipo_vektoro
     | "&" ~ sang_keyword? ~ tipo
-    | identigilo
+    | identigilo ~ ("<" ~ tipo_list ~ ">")?
 }
+
+tipo_list = { tipo ~ ("," ~ tipo)* }
 
 // -- Literals --
 integer_literal = @{ ASCII_DIGIT+ }
@@ -118,14 +122,17 @@ unary_op = { "-" | "!" | "&" ~ sang_keyword? | "*" }
 voko_expr = { atomo ~ voko_sufikso* }
 
 voko_sufikso = {
-    "." ~ identigilo
+    "." ~ identigilo ~ "(" ~ expr_list? ~ ")"
+    | "." ~ identigilo
     | "[" ~ expr ~ "]"
     | "(" ~ expr_list? ~ ")"
     | "!" ~ "(" ~ expr_list? ~ ")"
+    | "?"
 }
 
 atomo = {
     literal
+    | provu_expr
     | se_expr
     | dum_expr
     | por_expr
@@ -139,6 +146,7 @@ atomo = {
 
 bloko = { "{" ~ declaration* ~ "}" }
 
+provu_expr = { provu_keyword ~ bloko ~ (kaptu_keyword ~ bloko)? }
 se_expr = { se_keyword ~ expr ~ bloko ~ (alie_keyword ~ bloko)? }
 dum_expr = { dum_keyword ~ expr ~ bloko }
 por_expr = { por_keyword ~ identigilo ~ en_keyword ~ expr ~ bloko }
@@ -171,7 +179,7 @@ funkcio_decl = {
 }
 
 param_list = { param ~ ("," ~ param)* }
-param = { identigilo ~ ":" ~ tipo }
+param = { identigilo ~ ":" ~ tipo ~ ("=" ~ expr)? }
 
 strk_decl = {
     pub_keyword? ~ strk_keyword ~ identigilo ~ (etendu_keyword ~ identigilo)? ~ "{" ~ kampo* ~ "}"

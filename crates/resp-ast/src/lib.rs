@@ -99,6 +99,7 @@ pub enum UnuargOperaciilo {
     Ne,
     Referenci,
     Dereferenci,
+    Demandilo,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -136,9 +137,7 @@ pub enum Esprimo {
     Ripetu(Vec<Deklaro>),
     Kongruu(Box<Esprimo>, Vec<Brako>),
     Redonu(Box<Esprimo>),
-    Provu(Vec<Deklaro>, Option<Vec<Deklaro>>),
-    Kreis(Vec<Deklaro>),
-    Kreu(Vec<Deklaro>),
+    Provu(Box<Esprimo>, Option<Vec<Deklaro>>),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -193,6 +192,7 @@ pub enum Deklaro {
 pub struct Parametro {
     pub nomo: Located<String>,
     pub tipo: Option<Tipo>,
+    pub valor_defecto: Option<Esprimo>,
 }
 
 #[derive(Debug, Clone, PartialEq)]

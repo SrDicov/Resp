@@ -1,16 +1,26 @@
 //! Transpiler from Resp AST to Rust source code.
 //!
 //! Uses `syn` and `quote` to generate Rust token streams
-//! from the AST defined in `resp-ast`.
+//! from the AST defined in `resp-ast`. Uses `resp-sema` for
+//! semantic analysis (SymbolTable, name mangling).
 
 use proc_macro2::TokenStream;
 use quote::quote;
 use resp_ast::*;
+use resp_sema::SymbolTable;
 
 pub fn transpile(programo: &Programo) -> TokenStream {
     let mut tokens = TokenStream::new();
     for deklaro in &programo.deklaroj {
-        tokens.extend(transpile_deklaro(deklaro));
+        tokens.extend(transpile_deklaro(deklaro, None));
+    }
+    tokens
+}
+
+pub fn transpile_with_sema(programo: &Programo, tabla: &SymbolTable) -> TokenStream {
+    let mut tokens = TokenStream::new();
+    for deklaro in &programo.deklaroj {
+        tokens.extend(transpile_deklaro(deklaro, Some(tabla)));
     }
     tokens
 }
@@ -22,7 +32,7 @@ fn map_nomo(s: &str) -> String {
     }
 }
 
-fn transpile_deklaro(deklaro: &Deklaro) -> TokenStream {
+fn transpile_deklaro(deklaro: &Deklaro, tabla: Option<&SymbolTable>) -> TokenStream {
     match deklaro {
         Deklaro::Uzu { vojo } => {
             let parts: Vec<&str> = vojo.split("::").collect();
@@ -44,8 +54,7 @@ fn transpile_deklaro(deklaro: &Deklaro) -> TokenStream {
         Deklaro::Estu(nomo, tipo, expr, mutebla) => {
             let nomo_ident = syn::Ident::new(&nomo.value, proc_macro2::Span::call_site());
             let tip = tipo.as_ref().map(map_tipo);
-            let mut ekspr = expr.as_ref().map(transpile_expr);
-            // Auto-convert &str to String when target type is String
+            let mut ekspr = expr.as_ref().map(|e| transpile_expr(e));
             if let (Some(&Tipo::Teksto), Some(e)) = (tipo.as_ref(), &ekspr) {
                 let e_str = e.to_string();
                 if e_str.starts_with('"') {
@@ -75,10 +84,21 @@ fn transpile_deklaro(deklaro: &Deklaro) -> TokenStream {
             let params: Vec<_> = parametroj.iter().map(|p| {
                 let p_ident = syn::Ident::new(&p.nomo.value, proc_macro2::Span::call_site());
                 let p_tipo = p.tipo.as_ref().map(map_tipo);
-                quote! { #p_ident: #p_tipo }
+                match (&p.valor_defecto, &p_tipo) {
+                    (Some(def), Some(t)) => {
+                        let d = transpile_expr(def);
+                        quote! { #p_ident: #t = #d }
+                    }
+                    (Some(def), None) => {
+                        let d = transpile_expr(def);
+                        quote! { #p_ident = #d }
+                    }
+                    (None, Some(t)) => quote! { #p_ident: #t },
+                    (None, None) => quote! { #p_ident },
+                }
             }).collect();
             let ret = reveno.as_ref().map(map_tipo);
-            let korpo_tokens: Vec<_> = korpo.iter().map(|d| transpile_deklaro(d)).collect();
+            let korpo_tokens: Vec<_> = korpo.iter().map(|d| transpile_deklaro(d, tabla)).collect();
             if let Some(r) = &ret {
                 quote! {
                     fn #nomo_ident(#(#params),*) -> #r {
@@ -95,23 +115,74 @@ fn transpile_deklaro(deklaro: &Deklaro) -> TokenStream {
         }
         Deklaro::Strk { nomo, etendo, kampoj } => {
             let nomo_ident = syn::Ident::new(&nomo.value, proc_macro2::Span::call_site());
-            let kampoj_tokens: Vec<_> = kampoj.iter().map(|k| {
+            let field_tokens: Vec<_> = kampoj.iter().map(|k| {
                 let k_ident = syn::Ident::new(&k.nomo.value, proc_macro2::Span::call_site());
                 let k_tipo = map_tipo(&k.tipo);
                 let pub_attr = match k.visiblo {
                     Some(Visiblo::Publika) => quote! { pub },
                     _ => quote! {},
                 };
-                if let Some(_ext) = etendo {
-                    // Inheritance via composition: will be expanded
-                }
                 quote! { #pub_attr #k_ident: #k_tipo }
             }).collect();
-            quote! {
-                struct #nomo_ident {
-                    #(#kampoj_tokens),*
+
+            let mut tokens = TokenStream::new();
+
+            match etendo {
+                Some(parent_name) => {
+                    let parent_ident = syn::Ident::new(parent_name, proc_macro2::Span::call_site());
+                    // Check SymbolTable for parent struct fields
+                    let parent_fields = tabla.and_then(|t| t.get_struct(parent_name));
+                    let parent_field_tokens: Vec<_> = parent_fields.map(|s| {
+                        s.kampoj.iter().map(|k| {
+                            let k_ident = syn::Ident::new(&k.nomo.value, proc_macro2::Span::call_site());
+                            let k_tipo = map_tipo(&k.tipo);
+                            let pub_attr = match k.visiblo {
+                                Some(Visiblo::Publika) => quote! { pub },
+                                _ => quote! {},
+                            };
+                            quote! { #pub_attr #k_ident: #k_tipo }
+                        }).collect::<Vec<_>>()
+                    }).unwrap_or_default();
+
+                    // Generate struct with all fields + __parent
+                    let struct_def = quote! {
+                        struct #nomo_ident {
+                            #(#parent_field_tokens,)*
+                            #(#field_tokens),*
+                        }
+                    };
+                    tokens.extend(struct_def);
+
+                    // Generate Deref impl
+                    let deref_impl = quote! {
+                        impl std::ops::Deref for #nomo_ident {
+                            type Target = #parent_ident;
+                            fn deref(&self) -> &Self::Target {
+                                unsafe { std::mem::transmute::<&#nomo_ident, &Self::Target>(self) }
+                            }
+                        }
+                    };
+                    tokens.extend(deref_impl);
+
+                    // Generate DerefMut impl
+                    let deref_mut_impl = quote! {
+                        impl std::ops::DerefMut for #nomo_ident {
+                            fn deref_mut(&mut self) -> &mut Self::Target {
+                                unsafe { std::mem::transmute::<&mut #nomo_ident, &mut Self::Target>(self) }
+                            }
+                        }
+                    };
+                    tokens.extend(deref_mut_impl);
+                }
+                None => {
+                    tokens.extend(quote! {
+                        struct #nomo_ident {
+                            #(#field_tokens),*
+                        }
+                    });
                 }
             }
+            tokens
         }
         Deklaro::Enumb { nomo, variantoj } => {
             let nomo_ident = syn::Ident::new(&nomo.value, proc_macro2::Span::call_site());
@@ -132,7 +203,7 @@ fn transpile_deklaro(deklaro: &Deklaro) -> TokenStream {
         }
         Deklaro::Realigu { tipo, membroj } => {
             let tipo_ident: syn::Ident = syn::Ident::new(tipo, proc_macro2::Span::call_site());
-            let membroj_tokens: Vec<_> = membroj.iter().map(|d| transpile_deklaro(d)).collect();
+            let membroj_tokens: Vec<_> = membroj.iter().map(|d| transpile_deklaro(d, tabla)).collect();
             quote! {
                 impl #tipo_ident {
                     #(#membroj_tokens)*
@@ -169,7 +240,8 @@ fn transpile_deklaro(deklaro: &Deklaro) -> TokenStream {
             let e = transpile_expr(expr);
             match expr {
                 Esprimo::Se(..) | Esprimo::Dum(..) | Esprimo::Por(..)
-                    | Esprimo::Ripetu(..) | Esprimo::Kongruu(..) => quote! { #e },
+                    | Esprimo::Ripetu(..) | Esprimo::Kongruu(..)
+                    | Esprimo::Provu(..) => quote! { #e },
                 _ => quote! { #e; },
             }
         }
@@ -213,6 +285,7 @@ fn transpile_expr(expr: &Esprimo) -> TokenStream {
                 UnuargOperaciilo::Ne => quote! { !#e },
                 UnuargOperaciilo::Referenci => quote! { &#e },
                 UnuargOperaciilo::Dereferenci => quote! { *#e },
+                UnuargOperaciilo::Demandilo => quote! { #e? },
             }
         }
         Esprimo::Duarg(left, op, right) => {
@@ -261,15 +334,15 @@ fn transpile_expr(expr: &Esprimo) -> TokenStream {
             quote! { #a[#i] }
         }
         Esprimo::Bloko(deklaroj) => {
-            let d: Vec<_> = deklaroj.iter().map(|d| transpile_deklaro(d)).collect();
+            let d: Vec<_> = deklaroj.iter().map(|d| transpile_deklaro(d, None)).collect();
             quote! { { #(#d)* } }
         }
         Esprimo::Se(kond, tiam, alie) => {
             let k = transpile_expr(kond);
-            let t: Vec<_> = tiam.iter().map(|d| transpile_deklaro(d)).collect();
+            let t: Vec<_> = tiam.iter().map(|d| transpile_deklaro(d, None)).collect();
             match alie {
                 Some(a) => {
-                    let a_tokens: Vec<_> = a.iter().map(|d| transpile_deklaro(d)).collect();
+                    let a_tokens: Vec<_> = a.iter().map(|d| transpile_deklaro(d, None)).collect();
                     quote! { if #k { #(#t)* } else { #(#a_tokens)* } }
                 }
                 None => quote! { if #k { #(#t)* } },
@@ -277,24 +350,24 @@ fn transpile_expr(expr: &Esprimo) -> TokenStream {
         }
         Esprimo::Dum(kond, korpo) => {
             let k = transpile_expr(kond);
-            let k_tokens: Vec<_> = korpo.iter().map(|d| transpile_deklaro(d)).collect();
+            let k_tokens: Vec<_> = korpo.iter().map(|d| transpile_deklaro(d, None)).collect();
             quote! { while #k { #(#k_tokens)* } }
         }
         Esprimo::Por(var, kolekto, korpo) => {
             let v = syn::Ident::new(&var.value, proc_macro2::Span::call_site());
             let k = transpile_expr(kolekto);
-            let k_tokens: Vec<_> = korpo.iter().map(|d| transpile_deklaro(d)).collect();
+            let k_tokens: Vec<_> = korpo.iter().map(|d| transpile_deklaro(d, None)).collect();
             quote! { for #v in #k { #(#k_tokens)* } }
         }
         Esprimo::Ripetu(korpo) => {
-            let k_tokens: Vec<_> = korpo.iter().map(|d| transpile_deklaro(d)).collect();
+            let k_tokens: Vec<_> = korpo.iter().map(|d| transpile_deklaro(d, None)).collect();
             quote! { loop { #(#k_tokens)* } }
         }
         Esprimo::Kongruu(expr, brakoj) => {
             let e = transpile_expr(expr);
             let b: Vec<_> = brakoj.iter().map(|br| {
                 let patrono = transpile_patrono(&br.patrono);
-                let korpo: Vec<_> = br.korpo.iter().map(|d| transpile_deklaro(d)).collect();
+                let korpo: Vec<_> = br.korpo.iter().map(|d| transpile_deklaro(d, None)).collect();
                 quote! { #patrono => { #(#korpo)* } }
             }).collect();
             quote! { match #e { #(#b)* } }
@@ -303,19 +376,25 @@ fn transpile_expr(expr: &Esprimo) -> TokenStream {
             let e = transpile_expr(expr);
             quote! { return #e }
         }
-        Esprimo::Provu(try_block, catch_block) => {
-            let t: Vec<_> = try_block.iter().map(|d| transpile_deklaro(d)).collect();
+        Esprimo::Provu(try_expr, catch_block) => {
+            let try_tokens = transpile_expr(try_expr);
             match catch_block {
-                Some(_c) => {
-                    quote! { { #(#t)* } }
+                Some(catch) => {
+                    let catch_tokens: Vec<_> = catch.iter().map(|d| transpile_deklaro(d, None)).collect();
+                    quote! {
+                        (|| -> std::result::Result<_, Box<dyn std::error::Error>> {
+                            Ok({ #try_tokens })
+                        })().unwrap_or_else(|_| { #(#catch_tokens)* })
+                    }
                 }
                 None => {
-                    quote! { { #(#t)* } }
+                    quote! {
+                        (|| -> std::result::Result<_, Box<dyn std::error::Error>> {
+                            Ok({ #try_tokens })
+                        })().unwrap()
+                    }
                 }
             }
-        }
-        Esprimo::Kreis(_) | Esprimo::Kreu(_) => {
-            quote! { todo!() }
         }
     }
 }

@@ -1,0 +1,22 @@
+strk Ano {
+    nomo: Teksto,
+    ago: ent32,
+}
+
+strk Administranto etendu Ano {
+    administra_kodo: ent32,
+}
+
+fk krei_administranto() -> Administranto {
+    estu admin: Administranto = Administranto {
+        nomo: "Johano".to_string(),
+        ago: 30,
+        administra_kodo: 12345,
+    };
+    redonu admin;
+}
+
+fk main() {
+    estu admin = krei_administranto();
+    println!("Nomo: {}, Aĝo: {}, Kodo: {}", admin.nomo, admin.ago, admin.administra_kodo);
+}

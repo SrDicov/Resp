@@ -2,6 +2,7 @@
 members = [
     "crates/resp-ast",
     "crates/resp-parser",
+    "crates/resp-sema",
     "crates/resp-transpiler",
     "crates/resp-cli",
 ]

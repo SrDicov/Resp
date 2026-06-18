@@ -1,5 +1,5 @@
 [package]
-name = "resp-transpiler"
+name = "resp-sema"
 version.workspace = true
 edition.workspace = true
 description.workspace = true
@@ -10,7 +10,3 @@ homepage.workspace = true
 
 [dependencies]
 resp-ast = { path = "../resp-ast" }
-resp-sema = { path = "../resp-sema" }
-syn = { version = "2", features = ["full", "extra-traits"] }
-quote = "1"
-proc-macro2 = "1"
